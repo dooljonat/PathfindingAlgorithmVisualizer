@@ -11,15 +11,13 @@
 import sys
 
 import pygame
-import pygame_widgets
 pygame.init()
 
 import color_palette as colors
 from settings import Settings
 import util_functions as util
 from board import Board
-
-from pygame_widgets.button import Button
+from ui_obj import Button
 
 
 # Initialize grid size from cmd line arguments
@@ -77,30 +75,36 @@ def main():
     # 3 = END POINT
 
     # Initialize button objects
-    drawButton = Button(
-        SCREEN, 100, 100, 300, 150, text='Start',
-        fontSize=50, margin=20,
-        inactiveColour=(255, 0, 0),
-        pressedColour=(0, 255, 0), radius=20,
-        onClick=lambda: print('Click')
-     )
-    # TODO: Add start button
+    stopButton = Button(settings, 20, 520, 80, 50, 
+        colors.DRAW_BUTTON_COLOR, colors.DRAW_HOVER_COLOR, colors.DRAW_OUTLINE_COLOR, 
+        "Stop")
+    startButton = Button(settings, 20, 520, 80, 50, 
+        colors.START_BUTTON_COLOR, colors.START_HOVER_COLOR, colors.START_OUTLINE_COLOR, 
+        "Start")
 
     # Run until the user asks to quit
     running = True
-    userDrawing = True
     mouseDown = False
     board_update_val = 0
+    userDrawing = True
     while running:
         """ Event Handler """
         events = pygame.event.get()
         for event in events:
+            ( x, y ) = pygame.mouse.get_pos()
+
             # Check if user clicked the quit button
             if event.type == pygame.QUIT:
                 running = False
 
             # If the user clicks/drags the grid in drawing mode, update the board
             if userDrawing:
+                if startButton.isMouseOver(x, y):
+                    startButton.isHover = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        startButton.isHover = False
+                        userDrawing = False
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouseDown = True
                     # If user left clicked : Draw square
@@ -115,27 +119,24 @@ def main():
                     mouseDown = False
 
                 if mouseDown:
-                    # get position of mouse cursor on click event
-                    ( x, y ) = pygame.mouse.get_pos()
-                    print(x)
-                    print(y)
-
                     # if ( x , y ) is in grid
                     if x <= BOARD_WIDTH-1 and y <= BOARD_HEIGHT-1:
                         # Get board coordinates of where user clicked
                         board_x, board_y = board.convert_screen_coords_to_board_coords(x, y)
-                        print(board_x)
-                        print(board_y)
-                        print()
 
                         # Update board with new walls
                         board.array[board_x][board_y] = board_update_val
 
-            # TODO: Where "lambda" is in drawButton
-            #   if !userDraw -> userDraw = !userDraw
-        
-        
-        """ Drawing """
+            else:
+                if stopButton.isMouseOver(x, y):
+                    stopButton.isHover = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        stopButton.isHover = False
+                        userDrawing = True
+                else:
+                    stopButton.isHover = False
+
+        """ Drawing to screen """
         # Fill the background with white
         SCREEN.fill(colors.BACKGROUND_COLOR)
 
@@ -145,8 +146,14 @@ def main():
         # Draw grid overlay to screen
         board.draw_grid_overlay(SCREEN, board)
 
-        # Update pygame_widgets (buttons)
-        # pygame_widgets.update(events)
+        # Draw UI
+        if userDrawing:
+            startButton.draw(SCREEN)
+            font = pygame.font.SysFont('georgia', 12)
+            text = font.render("Left click to draw, right click to erase", 1, (0,0,0))
+            SCREEN.blit(text, (270, 540))
+        else:
+            stopButton.draw(SCREEN)
 
         # Flip display
         pygame.display.flip()
