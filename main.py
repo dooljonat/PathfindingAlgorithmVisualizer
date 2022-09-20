@@ -20,6 +20,7 @@ from board import Board
 from ui_obj import Button
 from astar_algorithm import astar
 from enum import Enum
+import visualizer as vis
 
 
 # Initialize grid size from cmd line arguments
@@ -109,7 +110,6 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            # If the user clicks/drags the grid in drawing mode, update the board
             if programState == ProgramState.USER_DRAWING:
                 if startButton.isMouseOver(x, y):
                     startButton.isHover = True
@@ -117,6 +117,7 @@ def main():
                         startButton.isHover = False
                         programState = ProgramState.PATHFINDING
 
+                # If the user clicks/drags the grid in drawing mode, update the board
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouseDown = True
                     # If user left clicked : Draw square
@@ -134,7 +135,8 @@ def main():
                     # if ( x , y ) is in grid
                     if x <= BOARD_WIDTH-1 and y <= BOARD_HEIGHT-1:
                         # Get board coordinates of where user clicked
-                        board_x, board_y = board.convert_screen_coords_to_board_coords(x, y)
+                        board_x, board_y = util.convert_screen_coords_to_board_coords(x, y, 
+                            settings.cell_width, settings.cell_height)
 
                         # Update board with new walls
                         board.array[board_x][board_y] = board_update_val
@@ -148,10 +150,11 @@ def main():
                 else:
                     stopButton.isHover = False
 
+                # Get path and remove start point and end point
                 path = astar(board.array, start_point, end_point)
-                print(path)
-                if path:
-                    programState == ProgramState.PATHFOUND
+                path.pop(0)
+                path.pop(-1)
+                programState = ProgramState.PATHFOUND
 
             elif programState == ProgramState.PATHFOUND:
                 if stopButton.isMouseOver(x, y):
@@ -160,8 +163,7 @@ def main():
                         stopButton.isHover = False
                         programState = ProgramState.USER_DRAWING
                 else:
-                    stopButton.isHover = False
-                # Draw path and path visualizer
+                    stopButton.isHover = False 
 
             
 
@@ -183,6 +185,10 @@ def main():
             SCREEN.blit(text, (270, 540))
         else:
             stopButton.draw(SCREEN)
+
+        # Draw path + visualizer
+        if programState == ProgramState.PATHFOUND:
+            vis.draw_path(SCREEN, settings, path)
 
         # Flip display
         pygame.display.flip()

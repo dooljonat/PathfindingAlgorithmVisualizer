@@ -77,24 +77,25 @@ def astar(board, start, end):
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
             # Make sure within range
-            if node_position[0] > (len(board) - 1) or node_position[0] < 0 or node_position[1] > (len(board[len(board)-1]) -1) or node_position[1] < 0:
+            if node_position[0] > (len(board) - 1) or node_position[0] < 0 or node_position[1] > (len(board) - 1) or node_position[1] < 0:
                 continue
 
             # Make sure walkable terrain
-            if board[node_position[0]][node_position[1]] in walkable:
-                # Create new node
-                new_node = Node(current_node, node_position)
+            if board[node_position[0]][node_position[1]] not in walkable:
+                continue
 
-                # Append
-                children.append(new_node)
+            # Create new node
+            new_node = Node(current_node, node_position)
+
+            # Append
+            children.append(new_node)
 
         # Loop through children
         for child in children:
 
             # Child is on the closed list
-            for closed_child in closed_list:
-                if child == closed_child:
-                    continue
+            if child in closed_list:
+                continue
 
             # Create the f, g, and h values
             child.g = current_node.g + 1

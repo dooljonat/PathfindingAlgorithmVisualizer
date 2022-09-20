@@ -9,14 +9,6 @@ class Board:
     def __init__(self, settings):
         self.settings = settings
 
-    def convert_screen_coords_to_board_coords(self, x, y):
-        x = util.floor_to_multiple(x, self.settings.cell_width)
-        y = util.floor_to_multiple(y, self.settings.cell_height)
-        return (int(x/self.settings.cell_width), int(y/self.settings.cell_height))
-    
-    def convert_board_coords_to_screen_coords(self, x, y):
-        return (x*self.settings.cell_width, y*self.settings.cell_height)
-
     def print_board(self):
         for i in range(len(self.array)):
             row = ""
@@ -25,7 +17,6 @@ class Board:
                 row += " "
             print(row)
 
-    
     def draw_board(self, SCREEN, board, start_point, end_point):
         """
         Draws the game board to the Pygame screen
@@ -47,7 +38,7 @@ class Board:
                     continue
 
                 cell_color = None
-                coord_x, coord_y = self.convert_board_coords_to_screen_coords(x, y)
+                coord_x, coord_y = util.convert_board_coords_to_screen_coords(x, y, self.settings.cell_width, self.settings.cell_height)
 
                 # Pick color to draw
                 if self.array[x][y] == 1:
