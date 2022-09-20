@@ -18,6 +18,8 @@ from settings import Settings
 import util_functions as util
 from board import Board
 from ui_obj import Button
+from astar_algorithm import astar
+from enum import Enum
 
 
 # Initialize grid size from cmd line arguments
@@ -26,6 +28,11 @@ if len(sys.argv) > 1:
 else:
     GRID_SIZE = 20
 
+# Program state
+class ProgramState(Enum):
+    USER_DRAWING = 0
+    PATHFINDING = 1
+    PATHFOUND = 2
 
 def main():
     """
@@ -66,8 +73,12 @@ def main():
     for i in range(GRID_SIZE):
         board.array[i] = [0] * GRID_SIZE
     # Set start point
+    start_point = (0, GRID_SIZE-1)
+    print(start_point)
     board.array[0][GRID_SIZE-1] = 2
     # Set end point
+    end_point = (GRID_SIZE-1, 0)
+    print(end_point)
     board.array[GRID_SIZE-1][0] = 3
     # 0 = EMPTY SPACE
     # 1 = WALL
@@ -86,7 +97,8 @@ def main():
     running = True
     mouseDown = False
     board_update_val = 0
-    userDrawing = True
+    programState = ProgramState.USER_DRAWING
+    path = None
     while running:
         """ Event Handler """
         events = pygame.event.get()
@@ -98,12 +110,12 @@ def main():
                 running = False
 
             # If the user clicks/drags the grid in drawing mode, update the board
-            if userDrawing:
+            if programState == ProgramState.USER_DRAWING:
                 if startButton.isMouseOver(x, y):
                     startButton.isHover = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         startButton.isHover = False
-                        userDrawing = False
+                        programState = ProgramState.PATHFINDING
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouseDown = True
@@ -127,27 +139,44 @@ def main():
                         # Update board with new walls
                         board.array[board_x][board_y] = board_update_val
 
-            else:
+            elif programState == ProgramState.PATHFINDING:
                 if stopButton.isMouseOver(x, y):
                     stopButton.isHover = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         stopButton.isHover = False
-                        userDrawing = True
+                        programState = ProgramState.USER_DRAWING
                 else:
                     stopButton.isHover = False
+
+                path = astar(board.array, start_point, end_point)
+                print(path)
+                if path:
+                    programState == ProgramState.PATHFOUND
+
+            elif programState == ProgramState.PATHFOUND:
+                if stopButton.isMouseOver(x, y):
+                    stopButton.isHover = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        stopButton.isHover = False
+                        programState = ProgramState.USER_DRAWING
+                else:
+                    stopButton.isHover = False
+                # Draw path and path visualizer
+
+            
 
         """ Drawing to screen """
         # Fill the background with white
         SCREEN.fill(colors.BACKGROUND_COLOR)
 
         # Draw board to screen
-        board.draw_board(SCREEN, board)
+        board.draw_board(SCREEN, board, start_point, end_point)
 
         # Draw grid overlay to screen
         board.draw_grid_overlay(SCREEN, board)
 
         # Draw UI
-        if userDrawing:
+        if programState == ProgramState.USER_DRAWING:
             startButton.draw(SCREEN)
             font = pygame.font.SysFont('georgia', 12)
             text = font.render("Left click to draw, right click to erase", 1, (0,0,0))

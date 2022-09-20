@@ -26,7 +26,7 @@ class Board:
             print(row)
 
     
-    def draw_board(self, SCREEN, board):
+    def draw_board(self, SCREEN, board, start_point, end_point):
         """
         Draws the game board to the Pygame screen
         Args:
@@ -34,28 +34,33 @@ class Board:
             pygame screen module : SCREEN
             array : board
                 -- 2D array containing board information
+            start_point: tuple
+                -- tuple containing start point coordinates
+            end_point: tuple
+                -- tuple containing end point coordinates
         Returns:
             VOID
         """
         for y in range(len(self.array)):
             for x in range(len(self.array[y])):
-                # If board coordinate is a...
-                # WALL
-                cell_color = colors.BACKGROUND_COLOR
+                if self.array[x][y] == 0:
+                    continue
+
+                cell_color = None
+                coord_x, coord_y = self.convert_board_coords_to_screen_coords(x, y)
+
+                # Pick color to draw
                 if self.array[x][y] == 1:
                     cell_color = colors.WALL_COLOR
-
-                # STARTPOINT
-                elif self.array[x][y] == 2:
+                elif x == start_point[0] and y == start_point[1]:
                     cell_color = colors.START_POINT_COLOR
-
-                # ENDPOINT
-                elif self.array[x][y] == 3:
+                elif x == end_point[0] and y == end_point[1]:
                     cell_color = colors.END_POINT_COLOR
-
-                coord_x, coord_y = self.convert_board_coords_to_screen_coords(x, y)
+                                
+                # Draw rect
                 pygame.draw.rect(SCREEN, cell_color, 
-                    pygame.Rect(coord_x, coord_y, self.settings.cell_width, self.settings.cell_height))
+                        pygame.Rect(coord_x, coord_y, self.settings.cell_width, self.settings.cell_height))
+        
 
     def draw_grid_overlay(self, SCREEN, board):
         """
