@@ -18,7 +18,7 @@ from settings import Settings
 import util_functions as util
 from board import Board
 from ui_obj import Button
-from astar_algorithm import astar
+from search_algorithms import astar_search
 from enum import Enum
 import visualizer as vis
 
@@ -152,7 +152,8 @@ def main():
                 else:
                     stopButton.isHover = False
 
-                path = astar(SCREEN, settings,board.array, start_point, end_point)
+                path = astar_search(board.array, start_point, end_point)
+                path.pop(-1)
                 programState = ProgramState.PATHFOUND
 
             elif programState == ProgramState.PATHFOUND:
