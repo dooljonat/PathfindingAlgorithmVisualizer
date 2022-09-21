@@ -1,6 +1,10 @@
 # https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
 # https://en.wikipedia.org/wiki/A*_search_algorithm
 # https://www.youtube.com/watch?v=-L-WgKMFuhE
+import pygame
+import color_palette as colors
+import util_functions as util
+
 
 class Node:
     """ Node object for A* pathfinding. Stores position, parent, and g,h,f costs """
@@ -15,6 +19,9 @@ class Node:
     # Compares current & other node's positions
     def __eq__(self, other):
         return self.position == other.position
+    
+    def __hash__(self):
+        return hash(str(self))
 
 # def backtrack_nodes(current_node):
 #     """ Backtracks from current (target node) and finding parents of nodes until
@@ -27,7 +34,7 @@ class Node:
 #     return path.reverse()
 
 
-def astar(board, start, end):
+def astar(SCREEN, settings, board, start, end):
     """Returns a list of tuples as a path from the given start to the given end in the given board"""
 
     # Create start and end node
@@ -37,11 +44,11 @@ def astar(board, start, end):
     end_node.g = end_node.h = end_node.f = 0
 
     # Initialize both open and closed list
-    open_list = []
-    closed_list = []
+    open_list = set()
+    closed_list = set()
 
     # Add the start node
-    open_list.append(start_node)
+    open_list.add(start_node)
 
     # List of walkable terrain values
     walkable = [0,2,3]
@@ -49,7 +56,7 @@ def astar(board, start, end):
     # Loop until you find the end
     while len(open_list) > 0:
         # Get the current node
-        current_node = open_list[0]
+        current_node = list(open_list)[0]
         current_index = 0
         for index, item in enumerate(open_list):
             if item.f < current_node.f:
@@ -57,8 +64,8 @@ def astar(board, start, end):
                 current_index = index
 
         # Pop current off open list, add to closed list
-        open_list.pop(current_index)
-        closed_list.append(current_node)
+        open_list.remove(current_node)
+        closed_list.add(current_node)
 
         # Found the goal
         if current_node == end_node:
@@ -108,7 +115,11 @@ def astar(board, start, end):
                     continue
 
             # Add the child to the open list
-            open_list.append(child)
+            open_list.add(child)
+            coord_x, coord_y = util.convert_board_coords_to_screen_coords(child.position[0], child.position[1], 
+            settings.cell_width, settings.cell_height)
+            pygame.draw.rect(SCREEN, colors.PATH_COLOR, 
+                pygame.Rect(coord_x, coord_y, settings.cell_width, settings.cell_height))
 
             
     

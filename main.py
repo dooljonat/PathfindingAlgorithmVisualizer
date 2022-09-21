@@ -11,7 +11,7 @@
 import sys
 
 import pygame
-pygame.init()
+import threading
 
 import color_palette as colors
 from settings import Settings
@@ -22,6 +22,7 @@ from astar_algorithm import astar
 from enum import Enum
 import visualizer as vis
 
+pygame.init()
 
 # Initialize grid size from cmd line arguments
 if len(sys.argv) > 1:
@@ -35,6 +36,7 @@ class ProgramState(Enum):
     PATHFINDING = 1
     PATHFOUND = 2
 
+
 def main():
     """
     Runs the pygame clock, event handler, and main loop
@@ -43,6 +45,7 @@ def main():
     Returns:
         VOID
     """
+
     # Initialize global SCREEN and clock variables
     global SCREEN, CLOCK
 
@@ -99,7 +102,7 @@ def main():
     mouseDown = False
     board_update_val = 0
     programState = ProgramState.USER_DRAWING
-    path = None
+    pathfind_thread = None
     while running:
         """ Event Handler """
         events = pygame.event.get()
@@ -150,10 +153,7 @@ def main():
                 else:
                     stopButton.isHover = False
 
-                # Get path and remove start point and end point
-                path = astar(board.array, start_point, end_point)
-                path.pop(0)
-                path.pop(-1)
+                path = astar(SCREEN, settings,board.array, start_point, end_point)
                 programState = ProgramState.PATHFOUND
 
             elif programState == ProgramState.PATHFOUND:
@@ -162,10 +162,9 @@ def main():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         stopButton.isHover = False
                         programState = ProgramState.USER_DRAWING
+                        path = None
                 else:
                     stopButton.isHover = False 
-
-            
 
         """ Drawing to screen """
         # Fill the background with white
@@ -193,8 +192,11 @@ def main():
         # Flip display
         pygame.display.flip()
 
+        # TODO: LOOK INTO THREADING TO PREVENT FREEZING
+
     # Terminate program
     pygame.quit()
+
 
 if __name__ == "__main__":
     print("Starting pathfinding algorithm visualizer")
