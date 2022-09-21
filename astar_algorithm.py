@@ -6,6 +6,8 @@ import color_palette as colors
 import util_functions as util
 
 
+# TODO: YOUR LOGIC IN THE ASTAR CODE IS BROKEN. THE PROGRAM CHECKS SPOTS ITS ALREADY CHECKED MULTIPLE TIMES
+
 class Node:
     """ Node object for A* pathfinding. Stores position, parent, and g,h,f costs """
     def __init__(self, parent=None, position=None):

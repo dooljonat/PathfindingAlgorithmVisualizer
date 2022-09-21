@@ -102,7 +102,6 @@ def main():
     mouseDown = False
     board_update_val = 0
     programState = ProgramState.USER_DRAWING
-    pathfind_thread = None
     while running:
         """ Event Handler """
         events = pygame.event.get()
