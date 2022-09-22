@@ -153,8 +153,12 @@ def main():
                     stopButton.isHover = False
 
                 path = astar_search(board.array, start_point, end_point)
-                path.pop(-1)
-                programState = ProgramState.PATHFOUND
+                if path:
+                    path.pop(-1)
+                    programState = ProgramState.PATHFOUND
+                else:
+                    print("NO VALID PATH ATTAINABLE")
+                    programState = ProgramState.USER_DRAWING
 
             elif programState == ProgramState.PATHFOUND:
                 if stopButton.isMouseOver(x, y):
