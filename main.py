@@ -97,11 +97,18 @@ def main():
         colors.START_BUTTON_COLOR, colors.START_HOVER_COLOR, colors.START_OUTLINE_COLOR, 
         "Start")
 
+    # Path and steps(of pathfinding for visualizer)
+    path = None
+    steps = None
+    current_step_index = 0
+
     # Run until the user asks to quit
     running = True
     mouseDown = False
     board_update_val = 0
     programState = ProgramState.USER_DRAWING
+    timer = 0
+    timer_max = 10000
     while running:
         """ Event Handler """
         events = pygame.event.get()
@@ -152,7 +159,7 @@ def main():
                 else:
                     stopButton.isHover = False
 
-                path = astar_search(board.array, start_point, end_point)
+                path, steps = astar_search(board.array, start_point, end_point)
                 if path:
                     path.pop(-1)
                     programState = ProgramState.PATHFOUND
@@ -191,12 +198,17 @@ def main():
 
         # Draw path + visualizer
         if programState == ProgramState.PATHFOUND:
+            # TODO: https://stackoverflow.com/questions/42753349/draw-lines-with-time-delay-pygame
+            # 1. Return from the A* func 
+            #    a set of steps of tuples (positions, score) 
+            #       representing the steps the pathfinding algo goes through, 
+            # 2. Draw the steps with a time delay
+            # 3. Color code the positions based on their scores
+
             vis.draw_path(SCREEN, settings, path)
 
         # Flip display
         pygame.display.flip()
-
-        # TODO: LOOK INTO THREADING TO PREVENT FREEZING
 
     # Terminate program
     pygame.quit()

@@ -4,6 +4,10 @@ def heuristic(a, b):
     return ((a[0] - b[0]) ** 2) + ((a[1] - b[1]) ** 2)
 
 def astar_search(board_array, start, goal):
+    # Steps (list of neighbors in sequence of how the program found them to allow the visualizer to 
+    #   draw out the steps)
+    steps = set()
+
     # Directions to look for neighbors
     neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
 
@@ -31,7 +35,7 @@ def astar_search(board_array, start, goal):
             while current in came_from:
                 data.append(current)
                 current = came_from[current]
-            return data[::-1]
+            return (data[::-1], steps)
 
         # Get neighbors of current position and push them to the heap IF
         #  1. they are within the boundaries of the board
@@ -63,6 +67,7 @@ def astar_search(board_array, start, goal):
                 gscore[neighbor] = tentative_g_score
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
                 heapq.heappush(oheap, (fscore[neighbor], neighbor))
+                steps.add(neighbor)
  
 
     return False
